@@ -40,9 +40,7 @@ CREATE TABLE Track (
 fname = input('Enter file name: ')
 if ( len(fname) < 1 ) : fname = 'Library.xml'
 
-# <key>Track ID</key><integer>369</integer>
-# <key>Name</key><string>Another One Bites The Dust</string>
-# <key>Artist</key><string>Queen</string>
+#function to check the key and it's value
 def lookup(d, key):
     found = False
     for child in d:
@@ -54,9 +52,12 @@ def lookup(d, key):
 stuff = ET.parse(fname)
 all = stuff.findall('dict/dict/dict')
 print('Dict count:', len(all))
+#looping through each element
 for entry in all:
+    #condition for valid track
     if ( lookup(entry, 'Track ID') is None ) : continue
 
+    # extracting all the required data
     name = lookup(entry, 'Name')
     artist = lookup(entry, 'Artist')
     album = lookup(entry, 'Album')
@@ -67,14 +68,17 @@ for entry in all:
 
     # print(name , artist , album , count , rating , length)
 
+    # checking if the data exits
     if name is None or artist is None or album is None or genre is None :
         continue
 
     # print(name, artist, album, count, rating, length)
 
+    # command for adding the rows in each table
     cur.execute('''INSERT OR IGNORE INTO Artist (name)
         VALUES ( ? )''', ( artist, ) )
     cur.execute('SELECT id FROM Artist WHERE name = ? ', (artist, ))
+    # extracting the id
     artist_id = cur.fetchone()[0]
 
     cur.execute('''INSERT OR IGNORE INTO Album (title, artist_id)
@@ -92,5 +96,6 @@ for entry in all:
         VALUES ( ?, ?, ?, ?, ?, ?)''',
         ( name, album_id, genre_id, length, rating, count ) )
 
+#   end
     conn.commit()
 print("End of Program")
